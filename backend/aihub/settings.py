@@ -86,8 +86,12 @@ WSGI_APPLICATION = 'aihub.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'aihub_db',           # your database name
+        'USER': 'aihub_user',         # your PostgreSQL username
+        'PASSWORD': 'your_secure_password',  # your PostgreSQL password
+        'HOST': 'localhost',          # or the server IP if remote
+        'PORT': '5432',               # default PostgreSQL port
     }
 }
 
