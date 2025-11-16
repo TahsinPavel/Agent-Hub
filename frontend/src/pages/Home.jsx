@@ -18,7 +18,8 @@ export default function Home() {
   useEffect(() => {
     const loadAgents = async () => {
       try {
-        const data = await fetchAgents();
+        setLoading(true);
+        const data = await fetchAgents(); // Remove workspace parameter
         setAgents(data);
       } catch (error) {
         console.error("Failed to load agents:", error);
@@ -40,13 +41,14 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner">
-          <div className="spinner-ring"></div>
-          <div className="spinner-ring"></div>
-          <div className="spinner-ring"></div>
-        </div>
-        <p className="loading-text">Loading AI Agent Hub...</p>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '50vh',
+        color: '#999'
+      }}>
+        Loading agents...
       </div>
     );
   }
@@ -82,7 +84,7 @@ export default function Home() {
       <div className="section-container">
         <div style={{ marginBottom: 50 }}>
           <h2 className="section-title">⭐ Top Rated</h2>
-          <p className="section-subtitle">Highest rated agents by our community</p>
+          <p className="section-subtitle">Highest rated agents available</p>
         </div>
         <CategorySection agents={topRated} />
       </div>

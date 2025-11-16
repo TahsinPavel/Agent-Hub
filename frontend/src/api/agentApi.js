@@ -6,12 +6,23 @@ export const fetchAgents = async () => {
   return response.data;
 };
 
-export const callAgent = async (agentId) => {
+export const callAgent = async (agentIdOrName, payload = {}) => {
   try {
-    const response = await axios.post(`/api/agents/${agentId}/call/`);
+    const response = await axios.post(`/api/agents/${agentIdOrName}/call/`, payload);
     return response.data;
   } catch (error) {
     console.error("Agent call failed", error.response || error);
     throw error;
   }
+};
+
+// Workspace API functions
+export const fetchWorkspaces = async () => {
+  const response = await axios.get("/api/workspaces/");
+  return response.data;
+};
+
+export const createWorkspace = async (name) => {
+  const response = await axios.post("/api/workspaces/", { name });
+  return response.data;
 };

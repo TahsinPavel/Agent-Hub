@@ -12,7 +12,14 @@ export default function AgentCard({ agent }) {
     setError(null);
     setResponse(null);
     try {
-      const data = await callAgent(agent.id, "Hello AI"); // replace with dynamic input if needed
+      let data;
+      if (agent.name === 'Writer Agent') {
+        // Call the writer agent through your backend
+        data = await callAgent('writer', { prompt: "Write a short creative story" });
+      } else {
+        // For other agents, use the regular call
+        data = await callAgent(agent.id, "Hello AI");
+      }
       setResponse(data);
     } catch (err) {
       setError("Agent call failed");
