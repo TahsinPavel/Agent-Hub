@@ -1,74 +1,33 @@
-import requests
-import json
-from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views import View
-from .models import Agent
+import json
+import requests
+from .services import AgentFactory
 
 # List all agents (for GET /api/agents/)
 class AgentListView(View):
     def get(self, request):
-        # For now, return hardcoded agents including your writer agent
-        # Later you can store these in the database if needed
-        agents = [
-            {
-                'id': 1,
-                'name': 'Writer Agent',
-                'description': 'An AI agent specialized in creative writing, content creation, and text generation. Perfect for blogs, stories, and marketing copy.',
-                'category': '✍️ Writing',
-                'price': 9.99,
-                'rating': 4.8,
-                'downloads': 1250,
-                'icon': '✍️',
-                'created_at': '2024-01-01T00:00:00Z'
-            },
-            {
-                'id': 2,
-                'name': 'Code Assistant',
-                'description': 'A programming assistant that helps with code review, debugging, and development across multiple languages.',
-                'category': '💻 Developer',
-                'price': 14.99,
-                'rating': 4.9,
-                'downloads': 2100,
-                'icon': '💻',
-                'created_at': '2024-01-02T00:00:00Z'
-            },
-            {
-                'id': 3,
-                'name': 'Data Analyst',
-                'description': 'An AI agent that analyzes data, creates reports, and provides actionable business insights.',
-                'category': '📈 Marketing',
-                'price': 19.99,
-                'rating': 4.7,
-                'downloads': 890,
-                'icon': '📊',
-                'created_at': '2024-01-03T00:00:00Z'
-            },
-            {
-                'id': 4,
-                'name': 'Image Generator',
-                'description': 'Create stunning AI-generated images, artwork, and visual content for any project.',
-                'category': '🎨 Images',
-                'price': 12.99,
-                'rating': 4.6,
-                'downloads': 1800,
-                'icon': '🎨',
-                'created_at': '2024-01-04T00:00:00Z'
-            },
-            {
-                'id': 5,
-                'name': 'Task Automator',
-                'description': 'Automate repetitive tasks and workflows to boost your productivity and efficiency.',
-                'category': '⚡ Productivity',
-                'price': 16.99,
-                'rating': 4.5,
-                'downloads': 1500,
-                'icon': '⚡',
-                'created_at': '2024-01-05T00:00:00Z'
-            }
-        ]
+        # Get available agents from factory
+        available_agents = AgentFactory.get_available_agents()
+        
+        agents = []
+        for agent_name in available_agents:
+            agent_info = AgentFactory.get_agent_info(agent_name)
+            if agent_info:
+                agents.append({
+                    'id': agent_name,
+                    'name': agent_info['name'],
+                    'description': agent_info['description'],
+                    'category': agent_info['category'],
+                    'models': agent_info.get('models', []),
+                    'price': 9.99,  # You can make this dynamic
+                    'rating': 4.8,
+                    'downloads': 1250,
+                    'icon': agent_info['category'].split()[0],
+                    'created_at': '2024-01-01T00:00:00Z'
+                })
         
         print(f"Backend returning {len(agents)} agents")
         return JsonResponse(agents, safe=False)
@@ -80,39 +39,63 @@ def call_agent(request, agent_name):
     try:
         request_data = json.loads(request.body) if request.body else {}
         
-        # Map agent names to their actual endpoints
-        agent_endpoints = {
-            'writer': 'http://localhost:8001/generate-text/',
-            # Add more agents here as needed
-        }
+        # Use the agent factory
+        agent = AgentFactory.create_agent(agent_name)
+        result = agent.process(request_data)
         
-        if agent_name not in agent_endpoints:
-            return JsonResponse({
-                "error": f"Unknown agent: {agent_name}"
-            }, status=404)
+        # Check if there's an error in the result and provide better feedback
+        if isinstance(result, dict) and result.get('error'):
+            error_msg = result['error']
+            if 'concurrency' in error_msg.lower():
+                return JsonResponse({
+                    "error": "Rate limit exceeded",
+                    "message": "Too many requests. Please wait a moment and try again, or consider upgrading your Bytez account for higher rate limits."
+                }, status=429)
+            elif 'upgrade' in error_msg.lower():
+                return JsonResponse({
+                    "error": "Model access restricted",
+                    "message": "This model requires a paid Bytez account. Please upgrade your account or try a different model."
+                }, status=402)
+            elif 'fetch failed' in error_msg.lower():
+                return JsonResponse({
+                    "error": "API connection error",
+                    "message": "Unable to connect to the AI service. Please try again later."
+                }, status=502)
         
-        agent_url = agent_endpoints[agent_name]
+        return JsonResponse(result)
         
-        response = requests.post(
-            agent_url,
-            json=request_data,
-            headers={'Content-Type': 'application/json'},
-            timeout=30
-        )
-        
-        if response.status_code == 200:
-            return JsonResponse(response.json())
-        else:
-            return JsonResponse({
-                "error": f"Agent service returned status {response.status_code}",
-                "details": response.text
-            }, status=response.status_code)
-            
-    except requests.exceptions.ConnectionError:
+    except ValueError as e:
+        return JsonResponse({"error": str(e)}, status=404)
+    except requests.exceptions.Timeout:
         return JsonResponse({
-            "error": "Could not connect to agent service",
-            "message": "Make sure the agent service is running on port 8001"
-        }, status=503)
+            "error": "Request timeout", 
+            "message": "The AI model is taking too long to respond. Please try again with a simpler request."
+        }, status=408)
+    except Exception as e:
+        print(f"Error calling agent {agent_name}: {str(e)}")
+        return JsonResponse({
+            "error": "Internal server error", 
+            "message": str(e)
+        }, status=500)
+
+# Get agent details
+@csrf_exempt
+def get_agent_details(request, agent_name):
+    try:
+        agent_info = AgentFactory.get_agent_info(agent_name)
+        if not agent_info:
+            return JsonResponse({"error": "Agent not found"}, status=404)
+        
+        return JsonResponse({
+            'id': agent_name,
+            'name': agent_info['name'],
+            'description': agent_info['description'],
+            'category': agent_info['category'],
+            'models': agent_info.get('models', []),
+            'capabilities': agent_info.get('capabilities', []),
+            'pricing': agent_info.get('pricing', {}),
+        })
+        
     except Exception as e:
         return JsonResponse({
             "error": "Internal server error", 

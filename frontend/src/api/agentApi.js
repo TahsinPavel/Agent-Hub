@@ -8,10 +8,22 @@ export const fetchAgents = async () => {
 
 export const callAgent = async (agentIdOrName, payload = {}) => {
   try {
+    console.log(`Calling agent ${agentIdOrName} with payload:`, payload);
     const response = await axios.post(`/api/agents/${agentIdOrName}/call/`, payload);
+    console.log(`Agent ${agentIdOrName} response:`, response.data);
     return response.data;
   } catch (error) {
     console.error("Agent call failed", error.response || error);
+    throw error;
+  }
+};
+
+export const getAgentDetails = async (agentIdOrName) => {
+  try {
+    const response = await axios.get(`/api/agents/${agentIdOrName}/details/`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to get agent details", error.response || error);
     throw error;
   }
 };

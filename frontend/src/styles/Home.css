@@ -3,6 +3,7 @@
   position: relative;
   overflow-x: hidden;
   min-height: 100vh;
+  padding-top: 80px; /* Add space for fixed navbar */
 }
 
 /* Animated Background */
@@ -937,4 +938,97 @@
     flex-direction: column;
     gap: 16px;
   }
+}
+
+/* Navbar Styles */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 1000;
+  padding: 0 40px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-container {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbar-logo {
+  font-size: 1.8rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.navbar-menu {
+  display: flex;
+  list-style: none;
+  gap: 30px;
+}
+
+.nav-link {
+  color: #bcbcbc;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-link.active {
+  color: #fff;
+  background: rgba(100, 108, 255, 0.2);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-email {
+  color: #bcbcbc;
+  font-size: 14px;
+}
+
+.auth-button {
+  background: linear-gradient(135deg, #646cff, #ff64c8);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+}
+
+.auth-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(100, 108, 255, 0.4);
 }

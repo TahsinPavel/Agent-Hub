@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchAgents } from "../api/agentApi";
 import AgentCard from "../components/AgentCard";
+import Navbar from "../components/Navbar";
 
 export default function Marketplace() {
   const [agents, setAgents] = useState([]);
@@ -25,12 +26,15 @@ export default function Marketplace() {
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>🤖 AI Agent Marketplace</h2>
-      <div style={{ display: "flex", flexWrap: "wrap" }}>
-        {agents.map((agent) => (
-          <AgentCard key={agent.id} agent={agent} />
-        ))}
+    <div className="marketplace">
+      <Navbar />
+      <div style={{ padding: 20 }}>
+        <h2>🤖 AI Agent Marketplace</h2>
+        <div style={{ display: "flex", flexWrap: "wrap" }}>
+          {agents.map((agent) => (
+            <AgentCard key={agent.id} agent={agent} />
+          ))}
+        </div>
       </div>
     </div>
   );

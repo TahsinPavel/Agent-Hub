@@ -4,6 +4,7 @@ import "../styles/Home.css";
 import HeroSection from "../components/HeroSection";
 import FeaturedSection from "../components/FeaturedSection";
 import CategorySection from "../components/CategorySection";
+import Navbar from "../components/Navbar";
 
 const CATEGORIES = [
   "⚡ Productivity", "✍️ Writing", "🎨 Images", "💻 Developer", 
@@ -55,6 +56,7 @@ export default function Home() {
 
   return (
     <main className="modern-home">
+      <Navbar />
       {/* Animated Background */}
       <div className="animated-bg">
         <div className="gradient-orb orb-1"></div>

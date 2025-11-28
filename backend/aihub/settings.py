@@ -1,3 +1,17 @@
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# API Keys - Add these to your settings
+BYTEZ_API_KEY = os.getenv('BYTEZ_API_KEY', 'your-bytez-api-key-here')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', 'your-openai-key-here')
+
+# You can also add other API keys as needed
+ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY', '')
+HUGGINGFACE_API_KEY = os.getenv('HUGGINGFACE_API_KEY', '')
+
 from pathlib import Path
 from datetime import timedelta
 
